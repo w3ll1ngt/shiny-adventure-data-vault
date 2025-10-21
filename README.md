@@ -24,11 +24,14 @@
 
 ```
 .
-├── data_vault_design.md          # Документация проектирования хранилища
-├── greenplum_ddl.sql              # SQL DDL для создания объектов в Greenplum
-├── data_vault_diagram.txt         # ASCII диаграммы архитектуры
-├── IMPLEMENTATION_SUMMARY.md      # Сводка реализации и статистика
-└── README.md                      # Этот файл
+├── data_vault_design.md         # Документация проектирования хранилища
+├── greenplum_ddl.sql            # SQL DDL для создания объектов в Greenplum
+├── sample_etl.sql               # SQL inserts из csv kaggle superstore  в Greenplum
+├── data_vault_diagram.txt       # ASCII диаграммы архитектуры
+├── dv.drawio                    # диаграмма формата drawio
+└── README.md                    # мы сейчас здесь
+└── SampleSuperstore.md          # источник данных kaggle sampleSuperstore
+└── img.png                      # финальная визуализация в Yandex DataLens
 ```
 
 ## 🏗️ Архитектура Data Vault
@@ -53,46 +56,12 @@
 
 **SampleSuperstore.csv** - транзакционные данные розничных продаж с 21 полем:
 - Идентификаторы: Row ID, Order ID, Customer ID, Product ID
-- Временные данные: Order Date, Ship Date
 - Клиент: Customer Name, Segment, Country, Region, State, City, Postal Code
 - Товар: Product Name, Category, Sub-Category
 - Транзакции: Sales, Quantity, Discount, Profit, Ship Mode
 
 Подробнее на [Kaggle. About Dataset](https://www.kaggle.com/datasets/vivek468/superstore-dataset-final)
 
-## 🚀 Быстрый старт
-
-### Предварительные требования
-- Greenplum yandex-cloud
-- Доступ к базе данных с правами CREATE SCHEMA
-
-### Развертывание
-
-1. **Клонировать репозиторий:**
-```bash
-git clone https://github.com/w3ll1ngt/shiny-adventure-data-vault.git
-cd shiny-adventure-data-vault
-```
-
-2. **Выполнить DDL скрипт:**
-```bash
-psql -h <greenplum_host> -U <username> -d <database> -f greenplum_ddl.sql
-```
-
-3. **Проверить создание объектов:**
-```sql
--- Проверить созданную схему
-\dn dv
-
--- Список таблиц
-\dt dv.*
-
--- Список представлений
-\dv dv.*
-
--- Список функций
-\df dv.*
-```
 
 ## 💡 Примеры использования
 
