@@ -5,6 +5,7 @@
 -- =====================================================================
 
 -- Создание схемы для Data Vault
+
 CREATE SCHEMA IF NOT EXISTS dv;
 
 -- =====================================================================
@@ -21,7 +22,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql IMMUTABLE;
 
-COMMENT ON FUNCTION dv.generate_hash_key IS 'Генерация MD5 хеша для бизнес-ключа с нормализацией и обработкой NULL';
+COMMENT ON FUNCTION dv.generate_hash_key(p_business_key TEXT) IS 'Генерация MD5 хеша для бизнес-ключа с нормализацией и обработкой NULL';
 
 -- Функция для генерации композитного хеш-ключа (для Link таблиц)
 -- Улучшенная версия с защитой от коллизий
@@ -44,7 +45,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql IMMUTABLE;
 
-COMMENT ON FUNCTION dv.generate_composite_hash_key IS 'Генерация MD5 хеша для композитного ключа с нормализацией и защитой от коллизий';
+COMMENT ON FUNCTION dv.generate_composite_hash_key(p_keys text[]) IS 'Генерация MD5 хеша для композитного ключа с нормализацией и защитой от коллизий';
 
 -- =====================================================================
 -- HUB TABLES (Хабы)
@@ -53,17 +54,23 @@ COMMENT ON FUNCTION dv.generate_composite_hash_key IS 'Генерация MD5 х
 -- Хаб клиентов
 CREATE TABLE dv.hub_customer (
     hub_customer_id CHAR(32) NOT NULL,      -- MD5 hash от бизнес-ключа
-    customer_id VARCHAR(50) NOT NULL,        -- Бизнес-ключ из SampleSuperstore
+    customer_id VARCHAR(250) NOT NULL,        -- Бизнес-ключ из SampleSuperstore
     load_date TIMESTAMP NOT NULL,            -- Дата загрузки
     record_source VARCHAR(50) NOT NULL,      -- Источник записи
     CONSTRAINT pk_hub_customer PRIMARY KEY (hub_customer_id)
 )
 DISTRIBUTED BY (hub_customer_id);
 
--- Индекс для ускорения поиска по бизнес-ключу
-CREATE UNIQUE INDEX idx_hub_customer_bk ON dv.hub_customer(customer_id);
+ALTER TABLE dv.hub_customer
+    ALTER COLUMN customer_id TYPE VARCHAR(255);
 
-COMMENT ON TABLE dv.hub_customer IS 'Хаб клиентов - содержит уникальные бизнес-ключи клиентов из Sample Superstore';
+
+
+
+-- Индекс для ускорения поиска по бизнес-ключу
+CREATE UNIQUE INDEX idx_hub_customer_bk ON dv.hub_customer(customer_id, hub_customer_id);
+
+COMMENT ON TABLE dv.hub_customer  IS 'Хаб клиентов - содержит уникальные бизнес-ключи клиентов из Sample Superstore';
 
 -- Хаб товаров
 CREATE TABLE dv.hub_product (
@@ -76,7 +83,7 @@ CREATE TABLE dv.hub_product (
 DISTRIBUTED BY (hub_product_id);
 
 -- Индекс для ускорения поиска по бизнес-ключу
-CREATE UNIQUE INDEX idx_hub_product_bk ON dv.hub_product(product_id);
+CREATE UNIQUE INDEX idx_hub_product_bk ON dv.hub_product(product_id, hub_product_id);
 
 COMMENT ON TABLE dv.hub_product IS 'Хаб товаров - содержит уникальные бизнес-ключи товаров из Sample Superstore';
 
@@ -91,7 +98,7 @@ CREATE TABLE dv.hub_order (
 DISTRIBUTED BY (hub_order_id);
 
 -- Индекс для ускорения поиска по бизнес-ключу
-CREATE UNIQUE INDEX idx_hub_order_bk ON dv.hub_order(order_id);
+CREATE UNIQUE INDEX idx_hub_order_bk ON dv.hub_order(order_id, hub_order_id);
 
 COMMENT ON TABLE dv.hub_order IS 'Хаб заказов - содержит уникальные бизнес-ключи заказов из Sample Superstore';
 
@@ -118,7 +125,7 @@ DISTRIBUTED BY (link_order_customer_id);
 CREATE INDEX idx_link_order_customer_cust ON dv.link_order_customer(hub_customer_id);
 CREATE INDEX idx_link_order_customer_ord ON dv.link_order_customer(hub_order_id);
 -- Уникальный индекс для предотвращения дубликатов связей заказ-клиент
-CREATE UNIQUE INDEX idx_link_order_customer_unique ON dv.link_order_customer(hub_order_id, hub_customer_id);
+CREATE UNIQUE INDEX idx_link_order_customer_unique ON dv.link_order_customer(hub_order_id, hub_customer_id, link_order_customer_id);
 
 COMMENT ON TABLE dv.link_order_customer IS 'Связь между заказами и клиентами';
 
@@ -141,7 +148,7 @@ DISTRIBUTED BY (link_order_product_id);
 -- Индексы для оптимизации запросов
 CREATE INDEX idx_link_order_product_ord ON dv.link_order_product(hub_order_id);
 CREATE INDEX idx_link_order_product_prod ON dv.link_order_product(hub_product_id);
-CREATE UNIQUE INDEX idx_link_order_product_bk ON dv.link_order_product(row_id);
+CREATE UNIQUE INDEX idx_link_order_product_bk ON dv.link_order_product(row_id, link_order_product_id);
 
 COMMENT ON TABLE dv.link_order_product IS 'Связь между заказами и товарами (позиции заказа)';
 
@@ -356,36 +363,4 @@ WHERE so.load_end_date IS NULL
 
 COMMENT ON VIEW dv.v_order_details IS 'Детализация заказов с информацией о товарах из Sample Superstore';
 
--- =====================================================================
--- КОММЕНТАРИИ К СХЕМЕ
--- =====================================================================
-
 COMMENT ON SCHEMA dv IS 'Data Vault 2.0 schema для хранилища данных Sample Superstore';
-
--- =====================================================================
--- ПРИМЕРЫ INSERT STATEMENTS
--- =====================================================================
-
--- Пример вставки данных в хаб клиента
--- INSERT INTO dv.hub_customer (hub_customer_id, customer_id, load_date, record_source)
--- VALUES (
---     dv.generate_hash_key('CG-12520'),
---     'CG-12520',
---     CURRENT_TIMESTAMP,
---     'SampleSuperstore.csv'
--- );
-
--- Пример вставки данных в сателлит клиента
--- INSERT INTO dv.sat_customer (
---     hub_customer_id, load_date, load_end_date, hash_diff,
---     customer_name, segment, record_source
--- )
--- VALUES (
---     dv.generate_hash_key('CG-12520'),
---     CURRENT_TIMESTAMP,
---     NULL,
---     MD5('Claire Gute||Consumer'),
---     'Claire Gute',
---     'Consumer',
---     'SampleSuperstore.csv'
--- );

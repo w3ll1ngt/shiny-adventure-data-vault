@@ -4,7 +4,9 @@
 
 ## 📋 Описание проекта
 
-Полная реализация Data Vault 2.0 хранилища данных для анализа розничных продаж компании Superstore. Проект включает:
+Полная реализация Data Vault 2.0 хранилища данных для анализа розничных продаж. 
+За основу взят датасет [Kaggle Superstore](https://www.kaggle.com/datasets/vivek468/superstore-dataset-final). 
+Проект включает:
 
 - 📐 **Проектирование** - детальная архитектура Data Vault
 - 💾 **DDL скрипты** - готовые к развертыванию SQL скрипты для Greenplum
@@ -49,10 +51,12 @@
 - Товар: Product Name, Category, Sub-Category
 - Транзакции: Sales, Quantity, Discount, Profit, Ship Mode
 
+Подробнее на [Kaggle. About Dataset](https://www.kaggle.com/datasets/vivek468/superstore-dataset-final)
+
 ## 🚀 Быстрый старт
 
 ### Предварительные требования
-- Greenplum СУБД (или PostgreSQL для тестирования)
+- Greenplum yandex-cloud
 - Доступ к базе данных с правами CREATE SCHEMA
 
 ### Развертывание
@@ -87,8 +91,8 @@ psql -h <greenplum_host> -U <username> -d <database> -f greenplum_ddl.sql
 
 ### Просмотр актуальных данных о клиентах
 ```sql
-SELECT * FROM dv.v_current_customers 
-WHERE customer_id = 'CG-12520';
+SELECT * FROM dv.v_current_customers
+WHERE customer_id = 'Home Office|United States|Great Falls|Montana|59405';
 ```
 
 ### Анализ продаж по категориям
@@ -106,8 +110,8 @@ ORDER BY total_profit DESC;
 
 ### Детализация заказа
 ```sql
-SELECT * FROM dv.v_order_details 
-WHERE order_id = 'CA-2016-152156'
+SELECT * FROM dv.v_order_details
+WHERE order_id = 'Second Class|Henderson|42420'
 ORDER BY row_id;
 ```
 
@@ -172,7 +176,7 @@ ORDER BY s.load_date;
 - **[data_vault_design.md](data_vault_design.md)** - Полное описание проектирования хранилища
 - **[greenplum_ddl.sql](greenplum_ddl.sql)** - DDL скрипт с комментариями
 - **[data_vault_diagram.txt](data_vault_diagram.txt)** - Визуальные диаграммы архитектуры
-- **[IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md)** - Сводка реализации
+-  **[diagram drawio](https://app.diagrams.net/#Hw3ll1ngt%2Fshiny-adventure-data-vault%2Fmaster%2Fdv.drawio#%7B%22pageId%22%3A%22QSUUquhp0k-rUladNWHw%22%7D)** - Визуальная диаграмма хранилища в drawio
 
 ## 🎯 Преимущества подхода
 
@@ -196,11 +200,7 @@ ORDER BY s.load_date;
 
 ## 👤 Автор
 
-[@w3ll1ngt](https://github.com/w3ll1ngt)
-
-## 🤝 Вклад
-
-Проект открыт для предложений и улучшений. Пожалуйста, создайте Issue или Pull Request.
+[@w3ll1ngt](https://github.com/w3ll1ngt) & GitHub Copilot 
 
 ---
 
