@@ -229,8 +229,6 @@ CREATE TABLE dv.sat_order (
     load_date TIMESTAMP NOT NULL,              -- Дата загрузки (часть PK)
     load_end_date TIMESTAMP,                   -- Дата окончания действия записи
     hash_diff CHAR(32) NOT NULL,               -- Hash для обнаружения изменений
-    order_date DATE,                           -- Дата заказа из SampleSuperstore
-    ship_date DATE,                            -- Дата отгрузки
     ship_mode VARCHAR(50),                     -- Способ доставки (Standard Class, Second Class, First Class, Same Day)
     record_source VARCHAR(50) NOT NULL,        -- Источник записи
     CONSTRAINT pk_sat_order PRIMARY KEY (hub_order_id, load_date),
@@ -243,9 +241,6 @@ DISTRIBUTED BY (hub_order_id);
 CREATE INDEX idx_sat_order_current ON dv.sat_order(hub_order_id, load_date) 
     WHERE load_end_date IS NULL;
 
--- Индекс для аналитических запросов по дате заказа
-CREATE INDEX idx_sat_order_date ON dv.sat_order(order_date) 
-    WHERE load_end_date IS NULL;
 
 COMMENT ON TABLE dv.sat_order IS 'Сателлит атрибутов заказа с историей изменений';
 
@@ -317,8 +312,6 @@ CREATE OR REPLACE VIEW dv.v_current_orders AS
 SELECT 
     ho.hub_order_id,
     ho.order_id,
-    so.order_date,
-    so.ship_date,
     so.ship_mode,
     hc.customer_id,
     sc.customer_name,
@@ -339,8 +332,6 @@ COMMENT ON VIEW dv.v_current_orders IS 'Актуальное состояние 
 CREATE OR REPLACE VIEW dv.v_order_details AS
 SELECT 
     ho.order_id,
-    so.order_date,
-    so.ship_date,
     so.ship_mode,
     hp.product_id,
     sp.product_name,

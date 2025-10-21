@@ -119,8 +119,6 @@
    - load_date (PK)
    - load_end_date
    - hash_diff
-   - order_date
-   - ship_date
    - ship_mode
    - record_source
 
@@ -190,8 +188,6 @@
     │ hub_order_id (PK, FK)      │
     │ load_date (PK)             │
     │ hash_diff                  │
-    │ order_date                 │
-    │ ship_date                  │
     │ ship_mode                  │
     │ record_source              │
     └────────────────────────────┘

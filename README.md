@@ -6,6 +6,13 @@
 
 Полная реализация Data Vault 2.0 хранилища данных для анализа розничных продаж. 
 За основу взят датасет [Kaggle Superstore](https://www.kaggle.com/datasets/vivek468/superstore-dataset-final). 
+
+Результат визуализирован в [Yandex DataLens](https://datalens.ru/preview/5fwscbmm0dfoq)
+
+[чарт](https://datalens.ru/preview/5fwscbmm0dfoq-sales-superstore-dv)
+
+![img.png](img.png)
+
 Проект включает:
 
 - 📐 **Проектирование** - детальная архитектура Data Vault

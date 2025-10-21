@@ -135,14 +135,12 @@ FROM sample_superstore st
 
 -- order
 INSERT INTO dv.sat_order (hub_order_id, load_date, load_end_date, hash_diff,
-                          order_date, ship_date, ship_mode, record_source)
+                        ship_mode, record_source)
 SELECT DISTINCT
     h.hub_order_id,
     now(),
     NULL::timestamp,
     generate_hash_key("Ship Mode"),
-    current_date,           -- нет дат в CSV → заглушка
-    current_date,
     "Ship Mode",
     'SampleSuperstore'
 FROM sample_superstore st

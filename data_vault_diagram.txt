@@ -88,8 +88,6 @@ Data Vault 2.0 Диаграмма для Sample Superstore
     │ • load_date (PK)                │
     │ • load_end_date                 │
     │ • hash_diff                     │
-    │ • order_date                    │
-    │ • ship_date                     │
     │ • ship_mode                     │
     │ • record_source                 │
     └─────────────────────────────────┘
